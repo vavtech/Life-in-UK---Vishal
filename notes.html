@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vishal's Preparation Style</title>
+
+    <!-- Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Google Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        padding: 40px;
+        background: #f5f7fa;
+        color: #333;
+        display: flex;
+        justify-content: center;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 900px;
+      }
+
+      h2 {
+        font-weight: 600;
+        margin-bottom: 25px;
+        text-align: center;
+      }
+
+      /* Global Search */
+      #globalSearch {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        margin-bottom: 25px;
+        font-size: 15px;
+      }
+
+      /* Category Buttons */
+      .btn-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 25px;
+        justify-content: center;
+      }
+
+      button.category-btn {
+        padding: 10px 18px;
+        cursor: pointer;
+        border: none;
+        background-color: #e3e8ef;
+        color: #333;
+        border-radius: 8px;
+        font-size: 15px;
+        transition: 0.25s;
+        font-weight: 500;
+      }
+
+      button.category-btn:hover {
+        background-color: #d0d7e1;
+        transform: translateY(-2px);
+      }
+
+      button.category-btn.active {
+        background-color: #007bff;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+      }
+
+      /* Table Card */
+      #table-container {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        opacity: 0;
+        transform: translateY(10px);
+        transition: 0.4s ease;
+      }
+
+      #table-container.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Tag Chips */
+      .tag-chip {
+        padding: 8px 14px;
+        background: #e3e8ef;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: 0.25s;
+      }
+
+      .tag-chip:hover {
+        background: #d0d7e1;
+      }
+
+      .tag-chip.active {
+        background: #119b3a;
+        color: white;
+        box-shadow: 0 3px 10px rgba(0, 123, 255, 0.3);
+      }
+
+      .tag-chip-container {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+      }
+
+      /* Table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid #eee;
+        padding: 12px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f0f4f8;
+        font-weight: 600;
+      }
+
+      tr:hover {
+        background-color: #fafafa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h2>
+        Notes Viewer
+        <span style="color: #526066; font-size: 12px"
+          >(© 2026 vishal — All rights reserved)</span
+        >
+      </h2>
+
+      <!-- GLOBAL SEARCH -->
+      <input
+        type="text"
+        id="globalSearch"
+        placeholder="Search across all categories..."
+      />
+
+      <!-- CATEGORY BUTTONS -->
+      <div class="btn-container" id="buttons"></div>
+
+      <!-- TABLE OUTPUT -->
+      <div id="table-container"></div>
+    </div>
+
+    <script>
+      const data = [
+        {
+          People: [
+            {
+              key: "Sir Anthony Hopkins",
+              explanation: "A British actor and director won an Oscar",
+              tags: ["movie"],
+            },
+          ],
+        },
+        {
+          Population: [
+            {
+              key: "50 million",
+              explanation: "The population of the United Kingdom.",
+              tags: ["population", "UK"],
+            },
+          ],
+        },
+        {
+          Courts: [
+            {
+              key: "The Sheriff Court",
+              explanation: "A court of general jurisdiction in Scotland.",
+              tags: ["court", "Scotland"],
+            },
+          ],
+        },
+        {
+          Others: [
+            {
+              key: "Harrier jump jet",
+              explanation:
+                "A British military aircraft capable of vertical takeoff and landing.",
+              tags: ["military aircraft", "vertical takeoff"],
+            },
+          ],
+        },
+        {
+          Years: [
+            {
+              key: "1976",
+              explanation: "Concorde enters service.",
+              tags: ["War"],
+            },
+          ],
+        },
+        {
+          Flags: [
+            {
+              key: "flag1",
+              explanation: "Flag with red, white, black stripes.",
+              tags: ["national flag", "horizontal stripes"],
+            },
+          ],
+        },
+      ];
+
+      const btnContainer = document.getElementById("buttons");
+      const tableContainer = document.getElementById("table-container");
+      const globalSearch = document.getElementById("globalSearch");
+
+      let tagsVisible = true;
+      let currentRows = [];
+      let currentCategory = null;
+
+      // Create category buttons
+      data.forEach((item) => {
+        const key = Object.keys(item)[0];
+        const btn = document.createElement("button");
+        btn.textContent = key;
+        btn.className = "category-btn";
+
+        btn.onclick = () => {
+          document
+            .querySelectorAll(".category-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentCategory = key;
+          currentRows = item[key];
+          showCategoryTable(key, currentRows);
+        };
+
+        btnContainer.appendChild(btn);
+      });
+
+      // GLOBAL SEARCH — searches across all categories
+      globalSearch.oninput = () => {
+        const query = globalSearch.value.trim().toLowerCase();
+
+        if (query === "") {
+          if (currentCategory) {
+            showCategoryTable(currentCategory, currentRows);
+          } else {
+            tableContainer.innerHTML = "";
+          }
+          return;
+        }
+
+        const results = [];
+
+        data.forEach((item) => {
+          const category = Object.keys(item)[0];
+          item[category].forEach((row) => {
+            const text = `${row.key} ${row.explanation} ${row.tags.join(
+              " "
+            )}`.toLowerCase();
+            if (text.includes(query)) {
+              results.push({ ...row, category });
+            }
+          });
+        });
+
+        showSearchResults(results);
+      };
+
+      // Show table for a single category
+      function showCategoryTable(title, rows) {
+        const uniqueTags = [...new Set(rows.flatMap((r) => r.tags))];
+
+        let html = `
+      <div class="d-flex justify-content-end">
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="toggleTagsSwitch" checked>
+          <label class="form-check-label" for="toggleTagsSwitch">Show Tags</label>
+        </div>
+      </div>
+
+      <h3 style="margin-bottom: 3rem">${title}</h3>
+
+      <div class="tag-chip-container">
+        <span class="tag-chip active" data-tag="ALL">Show All</span>
+    `;
+
+        uniqueTags.forEach((tag) => {
+          html += `<span class="tag-chip" data-tag="${tag}">${tag}</span>`;
+        });
+
+        html += `</div>`;
+
+        html += `
+      <table id="dataTable">
+        <tr>
+          <th>Key</th>
+          <th>Explanation</th>
+          <th class="tags-col">Tags</th>
+        </tr>
+    `;
+
+        rows.forEach((r) => {
+          html += `
+        <tr>
+          <td>${r.key}</td>
+          <td>${r.explanation}</td>
+          <td class="tags-col">${r.tags.join(", ")}</td>
+        </tr>
+      `;
+        });
+
+        html += "</table>";
+
+        tableContainer.innerHTML = html;
+        tableContainer.classList.add("visible");
+
+        document.getElementById("toggleTagsSwitch").onchange = () => {
+          tagsVisible = document.getElementById("toggleTagsSwitch").checked;
+          applyTagsVisibility();
+        };
+
+        document.querySelectorAll(".tag-chip").forEach((chip) => {
+          chip.onclick = () => filterByTag(chip.dataset.tag);
+        });
+
+        applyTagsVisibility();
+      }
+
+      // Show unified search results
+      function showSearchResults(results) {
+        let html = `
+      <div class="d-flex justify-content-end">
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="toggleTagsSwitch" checked>
+          <label class="form-check-label" for="toggleTagsSwitch">Show Tags</label>
+        </div>
+      </div>
+
+      <h3>Search Results</h3>
+
+      <table id="dataTable">
+        <tr>
+          <th>Key</th>
+          <th>Explanation</th>
+          <th class="tags-col">Tags</th>
+          <th>Category</th>
+        </tr>
+    `;
+
+        results.forEach((r) => {
+          html += `
+        <tr>
+          <td>${r.key}</td>
+          <td>${r.explanation}</td>
+          <td class="tags-col">${r.tags.join(", ")}</td>
+          <td>${r.category}</td>
+        </tr>
+      `;
+        });
+
+        html += "</table>";
+
+        tableContainer.innerHTML = html;
+        tableContainer.classList.add("visible");
+
+        document.getElementById("toggleTagsSwitch").onchange = () => {
+          tagsVisible = document.getElementById("toggleTagsSwitch").checked;
+          applyTagsVisibility();
+        };
+
+        applyTagsVisibility();
+      }
+
+      // Toggle Tags Column
+      function applyTagsVisibility() {
+        const tagCells = document.querySelectorAll(".tags-col");
+        const switchLabel = document.querySelector(
+          "label[for='toggleTagsSwitch']"
+        );
+
+        tagCells.forEach((cell) => {
+          cell.style.display = tagsVisible ? "table-cell" : "none";
+        });
+
+        if (switchLabel) {
+          switchLabel.textContent = tagsVisible ? "Show Tags" : "Hide Tags";
+        }
+      }
+
+      // Tag Filter
+      function filterByTag(tag) {
+        document
+          .querySelectorAll(".tag-chip")
+          .forEach((c) => c.classList.remove("active"));
+        document
+          .querySelector(`.tag-chip[data-tag="${tag}"]`)
+          .classList.add("active");
+
+        const rows = document.querySelectorAll(
+          "#dataTable tr:not(:first-child)"
+        );
+
+        rows.forEach((row) => {
+          const tags = row.children[2].innerText
+            .split(",")
+            .map((t) => t.trim());
+          row.style.display = tag === "ALL" || tags.includes(tag) ? "" : "none";
+        });
+      }
+    </script>
+  </body>
+</html>
